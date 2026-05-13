@@ -1,0 +1,166 @@
+server:
+  port: 8080
+
+jwt:
+  secret: my-secret-key-ayush-chouhan-stockpro-secret-key-2024
+
+spring:
+  application:
+    name: API-GATEWAY
+
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+
+      routes:
+        # ================= NORMAL ROUTES =================
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/products/**
+
+        - id: warehouse-service
+          uri: lb://WAREHOUSE-SERVICE
+          predicates:
+            - Path=/warehouses/**,/stock/**
+
+        - id: supplier-service
+          uri: lb://SUPPLIER-SERVICE
+          predicates:
+            - Path=/suppliers/**
+
+        - id: purchase-service
+          uri: lb://PURCHASE-SERVICE
+          predicates:
+            - Path=/purchase-orders/**
+
+        - id: movement-service
+          uri: lb://MOVEMENT-SERVICE
+          predicates:
+            - Path=/movements/**
+
+        - id: report-service
+          uri: lb://REPORT-SERVICE
+          predicates:
+            - Path=/reports/**
+
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/payments/**
+
+        - id: alert-service
+          uri: lb://ALERT-SERVICE
+          predicates:
+            - Path=/alerts/**
+
+        # ================= SWAGGER DOC ROUTES =================
+        - id: auth-service-docs
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth-service/v3/api-docs
+          filters:
+            - RewritePath=/auth-service/v3/api-docs, /v3/api-docs
+
+        - id: product-service-docs
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/product-service/v3/api-docs
+          filters:
+            - RewritePath=/product-service/v3/api-docs, /v3/api-docs
+
+        - id: supplier-service-docs
+          uri: lb://SUPPLIER-SERVICE
+          predicates:
+            - Path=/supplier-service/v3/api-docs
+          filters:
+            - RewritePath=/supplier-service/v3/api-docs, /v3/api-docs
+
+        - id: warehouse-service-docs
+          uri: lb://WAREHOUSE-SERVICE
+          predicates:
+            - Path=/warehouse-service/v3/api-docs
+          filters:
+            - RewritePath=/warehouse-service/v3/api-docs, /v3/api-docs
+
+        - id: movement-service-docs
+          uri: lb://MOVEMENT-SERVICE
+          predicates:
+            - Path=/movement-service/v3/api-docs
+          filters:
+            - RewritePath=/movement-service/v3/api-docs, /v3/api-docs
+
+        - id: purchase-service-docs
+          uri: lb://PURCHASE-SERVICE
+          predicates:
+            - Path=/purchase-service/v3/api-docs
+          filters:
+            - RewritePath=/purchase-service/v3/api-docs, /v3/api-docs
+
+        - id: report-service-docs
+          uri: lb://REPORT-SERVICE
+          predicates:
+            - Path=/report-service/v3/api-docs
+          filters:
+            - RewritePath=/report-service/v3/api-docs, /v3/api-docs
+
+        - id: payment-service-docs
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/payment-service/v3/api-docs
+          filters:
+            - RewritePath=/payment-service/v3/api-docs, /v3/api-docs
+
+        - id: alert-service-docs
+          uri: lb://ALERT-SERVICE
+          predicates:
+            - Path=/alert-service/v3/api-docs
+          filters:
+            - RewritePath=/alert-service/v3/api-docs, /v3/api-docs
+
+# ================= TOP-LEVEL (NOT inside spring!) =================
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: auth-service
+        url: /auth-service/v3/api-docs
+      - name: product-service
+        url: /product-service/v3/api-docs
+      - name: supplier-service
+        url: /supplier-service/v3/api-docs
+      - name: warehouse-service
+        url: /warehouse-service/v3/api-docs
+      - name: movement-service
+        url: /movement-service/v3/api-docs
+      - name: purchase-service
+        url: /purchase-service/v3/api-docs
+      - name: report-service
+        url: /report-service/v3/api-docs
+      - name: payment-service
+        url: /payment-service/v3/api-docs
+      - name: alert-service
+        url: /alert-service/v3/api-docs
+
+  api-docs:
+    enabled: true
