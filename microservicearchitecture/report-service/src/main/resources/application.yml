@@ -1,0 +1,63 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: REPORT-SERVICE
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/stockpro_report_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  mvc:
+    pathmatch:
+      use-suffix-pattern: false
+
+# Dead stock threshold (days)
+report:
+  dead-stock-days: 90
+  slow-moving-days: 30
+
+# URLs of other services
+services:
+  warehouse-url: http://localhost:8084
+  purchase-url: http://localhost:8086
+  movement-url: http://localhost:8087
+  product-url: http://localhost:8083
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: false
+    hostname: localhost
+
+logging:
+  level:
+    com.stockpro: DEBUG
+  file:
+    name: logs/report-service.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    display-request-duration: true
