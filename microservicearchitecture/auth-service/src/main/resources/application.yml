@@ -6,9 +6,9 @@ spring:
     name: AUTH-SERVICE
 
   datasource:
-    url: jdbc:mysql://localhost:3306/stockpro_auth_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/stockpro_auth_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mail:
@@ -34,18 +34,18 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_URL:http://eureka-server:8761/eureka}
     register-with-eureka: true
     fetch-registry: true
   instance:
     prefer-ip-address: false
-    hostname: localhost
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:auth-service}
 
 # JWT config
 jwt:
-  secret: my-secret-key-ayush-chouhan-stockpro-secret-key-2024
-  expiration: 28800000
-  refresh-expiration: 604800000
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:28800000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 
 google:
   client-id: ${GOOGLE_CLIENT_ID:}

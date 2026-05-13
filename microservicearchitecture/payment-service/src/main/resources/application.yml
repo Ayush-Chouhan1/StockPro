@@ -6,9 +6,9 @@ spring:
     name: PAYMENT-SERVICE
 
   datasource:
-    url: jdbc:mysql://localhost:3306/stockpro_payment_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/stockpro_payment_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -25,19 +25,19 @@ spring:
 
 # Razorpay credentials
 razorpay:
-  key-id: rzp_test_SiBnzzxQGMrW8N
-  key-secret: 8cMdpkNjQoKmuWM603Io7yaR
-  currency: INR
+  key-id: ${RAZORPAY_KEY_ID}
+  key-secret: ${RAZORPAY_KEY_SECRET}
+  currency: ${RAZORPAY_CURRENCY:INR}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_URL:http://eureka-server:8761/eureka}
     register-with-eureka: true
     fetch-registry: true
   instance:
     prefer-ip-address: false
-    hostname: localhost
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:payment-service}
 
 logging:
   level:

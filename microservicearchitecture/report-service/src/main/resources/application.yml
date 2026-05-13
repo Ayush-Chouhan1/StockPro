@@ -6,9 +6,9 @@ spring:
     name: REPORT-SERVICE
 
   datasource:
-    url: jdbc:mysql://localhost:3306/stockpro_report_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/stockpro_report_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -30,20 +30,20 @@ report:
 
 # URLs of other services
 services:
-  warehouse-url: http://localhost:8084
-  purchase-url: http://localhost:8086
-  movement-url: http://localhost:8087
-  product-url: http://localhost:8083
+  warehouse-url: ${WAREHOUSE_SERVICE_URL:http://warehouse-service:8084}
+  purchase-url: ${PURCHASE_SERVICE_URL:http://purchase-service:8086}
+  movement-url: ${MOVEMENT_SERVICE_URL:http://movement-service:8087}
+  product-url: ${PRODUCT_SERVICE_URL:http://product-service:8083}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_URL:http://eureka-server:8761/eureka}
     register-with-eureka: true
     fetch-registry: true
   instance:
     prefer-ip-address: false
-    hostname: localhost
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:report-service}
 
 logging:
   level:

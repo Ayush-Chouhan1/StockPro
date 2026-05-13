@@ -1,1 +1,9 @@
 /.metadata/
+.env
+target/
+logs/
+.idea/
+.classpath
+.project
+.settings/
+*.log

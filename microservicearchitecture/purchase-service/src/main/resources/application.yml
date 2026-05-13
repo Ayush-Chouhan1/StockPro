@@ -6,9 +6,9 @@ spring:
     name: PURCHASE-SERVICE
 
   datasource:
-    url: jdbc:mysql://localhost:3306/stockpro_purchase_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/stockpro_purchase_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -25,21 +25,21 @@ spring:
 
   # RabbitMQ Configuration
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: stockpro
-    password: stockpro123
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
     virtual-host: /
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_URL:http://eureka-server:8761/eureka}
     register-with-eureka: true
     fetch-registry: true
   instance:
     prefer-ip-address: false
-    hostname: localhost
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:purchase-service}
 
 logging:
   level:
@@ -59,6 +59,6 @@ springdoc:
     display-request-duration: true
 
 services:
-  warehouse-url: http://localhost:8084
-  report-url: http://localhost:8089
-  movement-url: http://localhost:8087
+  warehouse-url: ${WAREHOUSE_SERVICE_URL:http://warehouse-service:8084}
+  report-url: ${REPORT_SERVICE_URL:http://report-service:8089}
+  movement-url: ${MOVEMENT_SERVICE_URL:http://movement-service:8087}

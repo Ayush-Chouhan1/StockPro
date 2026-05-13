@@ -2,7 +2,7 @@ server:
   port: 8080
 
 jwt:
-  secret: my-secret-key-ayush-chouhan-stockpro-secret-key-2024
+  secret: ${JWT_SECRET}
 
 spring:
   application:
@@ -14,7 +14,7 @@ spring:
         corsConfigurations:
           '[/**]':
             allowedOrigins:
-              - "http://localhost:3000"
+              - "${CORS_ALLOWED_ORIGIN:http://localhost:3000}"
             allowedMethods:
               - GET
               - POST
