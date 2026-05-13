@@ -1,0 +1,204 @@
+x-app-common: &app-common
+  restart: unless-stopped
+  environment: &app-environment
+    SPRING_DATASOURCE_USERNAME: root
+    SPRING_DATASOURCE_PASSWORD: root
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+    SPRING_RABBITMQ_HOST: rabbitmq
+    SPRING_RABBITMQ_PORT: 5672
+    SPRING_RABBITMQ_USERNAME: stockpro
+    SPRING_RABBITMQ_PASSWORD: stockpro123
+  depends_on:
+    mysql:
+      condition: service_healthy
+    rabbitmq:
+      condition: service_healthy
+    eureka-server:
+      condition: service_started
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: stockpro-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: "%"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: stockpro-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: stockpro
+      RABBITMQ_DEFAULT_PASS: stockpro123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+    image: stockpro/eureka-server:latest
+    container_name: stockpro-eureka-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    image: stockpro/api-gateway:latest
+    container_name: stockpro-api-gateway
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      EUREKA_INSTANCE_HOSTNAME: api-gateway
+    depends_on:
+      eureka-server:
+        condition: service_started
+    ports:
+      - "8080:8080"
+
+  auth-service:
+    <<: *app-common
+    build:
+      context: ./auth-service
+    image: stockpro/auth-service:latest
+    container_name: stockpro-auth-service
+    environment:
+      <<: *app-environment
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stockpro_auth_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      EUREKA_INSTANCE_HOSTNAME: auth-service
+      RESET_PASSWORD_FRONTEND_URL: http://localhost:3000/reset-password
+    ports:
+      - "8082:8082"
+
+  product-service:
+    <<: *app-common
+    build:
+      context: ./product-service
+    image: stockpro/product-service:latest
+    container_name: stockpro-product-service
+    environment:
+      <<: *app-environment
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stockpro_product_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      EUREKA_INSTANCE_HOSTNAME: product-service
+    ports:
+      - "8083:8083"
+
+  warehouse-service:
+    <<: *app-common
+    build:
+      context: ./warehouse-service
+    image: stockpro/warehouse-service:latest
+    container_name: stockpro-warehouse-service
+    environment:
+      <<: *app-environment
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stockpro_warehouse_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      EUREKA_INSTANCE_HOSTNAME: warehouse-service
+    ports:
+      - "8084:8084"
+
+  supplier-service:
+    <<: *app-common
+    build:
+      context: ./supplier-service
+    image: stockpro/supplier-service:latest
+    container_name: stockpro-supplier-service
+    environment:
+      <<: *app-environment
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stockpro_supplier_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      EUREKA_INSTANCE_HOSTNAME: supplier-service
+    ports:
+      - "8085:8085"
+
+  purchase-service:
+    <<: *app-common
+    build:
+      context: ./purchase-service
+    image: stockpro/purchase-service:latest
+    container_name: stockpro-purchase-service
+    environment:
+      <<: *app-environment
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stockpro_purchase_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      EUREKA_INSTANCE_HOSTNAME: purchase-service
+      SERVICES_WAREHOUSE_URL: http://warehouse-service:8084
+      SERVICES_REPORT_URL: http://report-service:8089
+      SERVICES_MOVEMENT_URL: http://movement-service:8087
+    ports:
+      - "8086:8086"
+
+  movement-service:
+    <<: *app-common
+    build:
+      context: ./movement-service
+    image: stockpro/movement-service:latest
+    container_name: stockpro-movement-service
+    environment:
+      <<: *app-environment
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stockpro_movement_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      EUREKA_INSTANCE_HOSTNAME: movement-service
+    ports:
+      - "8087:8087"
+
+  alert-service:
+    <<: *app-common
+    build:
+      context: ./alert-service
+    image: stockpro/alert-service:latest
+    container_name: stockpro-alert-service
+    environment:
+      <<: *app-environment
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stockpro_alert_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      EUREKA_INSTANCE_HOSTNAME: alert-service
+    ports:
+      - "8088:8088"
+
+  report-service:
+    <<: *app-common
+    build:
+      context: ./report-service
+    image: stockpro/report-service:latest
+    container_name: stockpro-report-service
+    environment:
+      <<: *app-environment
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stockpro_report_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      EUREKA_INSTANCE_HOSTNAME: report-service
+    ports:
+      - "8089:8089"
+
+  payment-service:
+    <<: *app-common
+    build:
+      context: ./payment-service
+    image: stockpro/payment-service:latest
+    container_name: stockpro-payment-service
+    environment:
+      <<: *app-environment
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stockpro_payment_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      EUREKA_INSTANCE_HOSTNAME: payment-service
+    ports:
+      - "8090:8090"
+
+volumes:
+  mysql_data:
+  rabbitmq_data:
