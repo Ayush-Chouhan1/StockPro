@@ -1,0 +1,71 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: AUTH-SERVICE
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/stockpro_auth_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: false
+    hostname: localhost
+
+# JWT config
+jwt:
+  secret: my-secret-key-ayush-chouhan-stockpro-secret-key-2024
+  expiration: 28800000
+  refresh-expiration: 604800000
+
+google:
+  client-id: ${GOOGLE_CLIENT_ID:}
+
+app:
+  reset-password:
+    frontend-url: ${RESET_PASSWORD_FRONTEND_URL:http://localhost:3000/reset-password}
+    token-expiration-minutes: ${RESET_PASSWORD_TOKEN_EXPIRATION_MINUTES:15}
+
+logging:
+  level:
+    com.stockpro: DEBUG
+  file:
+    name: logs/auth-service.log
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    display-request-duration: true
