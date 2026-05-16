@@ -18,12 +18,22 @@ pipeline {
             }
         }
 
-        stage('Verify Compose File') {
+        stage('Copy Env File') {
+            steps {
+                sh '''
+                cp /home/ubuntu/StockPro/microservicearchitecture/.env \
+                $WORKSPACE/microservicearchitecture/.env
+                '''
+            }
+        }
+
+        stage('Verify Files') {
             steps {
                 dir("${PROJECT_DIR}") {
                     sh '''
-                        ls
+                        ls -la
                         test -f docker-compose.yml
+                        test -f .env
                     '''
                 }
             }
