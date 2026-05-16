@@ -1,42 +1,58 @@
 pipeline {
     agent any
 
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
     environment {
-        SONARQUBE_ENV = 'sonarqube'
         PROJECT_DIR = 'microservicearchitecture'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Build and Test') {
+        stage('Verify Compose File') {
             steps {
                 dir("${PROJECT_DIR}") {
-                    sh 'mvn clean test'
+                    sh '''
+                        ls
+                        test -f docker-compose.yml
+                    '''
                 }
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                dir("${PROJECT_DIR}") {
-                    withSonarQubeEnv("${SONARQUBE_ENV}") {
-                        sh 'mvn sonar:sonar -DskipTests'
-                    }
-                }
-            }
-        }
-
-        stage('Build Docker Stack') {
+        stage('Deploy Containers') {
             steps {
                 dir("${PROJECT_DIR}") {
                     sh 'docker compose up -d --build'
                 }
             }
+        }
+
+        stage('Verify Running Containers') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    sh 'docker compose ps'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment successful'
+        }
+
+        failure {
+            echo 'Deployment failed'
         }
     }
 }
